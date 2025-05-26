@@ -99,6 +99,8 @@ XArray generally uses less memory for basic analytical operations.
 The optimal strategy often combines both libraries:
 
 ```python
+from src.data_access.zarr_reader import ClimateDataReader
+
 # Example: Best of both worlds
 # 1. Use Polars for data loading and transformation
 reader = ClimateDataReader(store_path)
