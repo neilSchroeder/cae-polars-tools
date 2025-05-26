@@ -1,0 +1,163 @@
+{
+  "large_loading": {
+    "small": {
+      "data_points": 30000,
+      "polars_normal": {
+        "time": 6.38407301902771,
+        "memory": 21.296875
+      },
+      "polars_streaming": {
+        "time": 6.3194005489349365,
+        "memory": 28.08203125
+      },
+      "xarray": {
+        "time": 6.036397218704224,
+        "memory": 9.30859375
+      }
+    },
+    "medium": {
+      "data_points": 600000,
+      "polars_normal": {
+        "time": 7.283781290054321,
+        "memory": 13.5234375
+      },
+      "polars_streaming": {
+        "time": 7.571725606918335,
+        "memory": 11.62109375
+      },
+      "xarray": {
+        "time": 6.3450329303741455,
+        "memory": 2.1171875
+      }
+    },
+    "large": {
+      "data_points": 7200000,
+      "polars_normal": {
+        "time": 6.393288612365723,
+        "memory": 137.36328125
+      },
+      "polars_streaming": {
+        "time": 6.7612388134002686,
+        "memory": 140.46484375
+      },
+      "xarray": {
+        "time": 7.059164524078369,
+        "memory": 46.9765625
+      }
+    },
+    "xlarge": {
+      "data_points": 28800000,
+      "polars_normal": {
+        "time": 7.904841423034668,
+        "memory": 555.8203125
+      },
+      "polars_streaming": {
+        "time": 11.345201015472412,
+        "memory": 644.6015625
+      },
+      "xarray": {
+        "time": 11.146446704864502,
+        "memory": 0.12890625
+      }
+    }
+  },
+  "complex_filtering": {
+    "simple_filter": {
+      "polars": {
+        "time": 0.003443002700805664,
+        "count": 480005
+      },
+      "xarray": {
+        "time": 0.0009517669677734375,
+        "count": 38045
+      }
+    },
+    "complex_filter": {
+      "polars": {
+        "time": 0.007812023162841797,
+        "count": 6526
+      },
+      "xarray": {
+        "time": 0.0043163299560546875,
+        "count": 6526
+      }
+    },
+    "seasonal_filter": {
+      "polars": {
+        "time": 0.001027822494506836,
+        "count": 150000
+      },
+      "xarray": {
+        "time": 0.0007870197296142578,
+        "count": 39510
+      }
+    }
+  },
+  "aggregation": {
+    "spatial_aggregation": {
+      "polars": {
+        "time": 0.1317911148071289,
+        "memory": 183.6796875,
+        "result_size": 22500
+      },
+      "xarray": {
+        "time": 0.023373126983642578,
+        "memory": 1.3515625,
+        "result_size": 120
+      }
+    },
+    "temporal_aggregation": {
+      "polars": {
+        "time": 0.022166967391967773,
+        "memory": 0.42578125,
+        "result_size": 120
+      },
+      "xarray": {
+        "time": 0.05865740776062012,
+        "memory": 10.33984375,
+        "result_count": 6
+      }
+    },
+    "rolling_operations": {
+      "polars": {
+        "time": 0.13125991821289062,
+        "memory": 72.79296875
+      },
+      "xarray": {
+        "time": 0.013852119445800781,
+        "memory": 12.609375
+      }
+    }
+  },
+  "join_operations": {
+    "inner_join": {
+      "polars": {
+        "time": 0.0065364837646484375,
+        "memory": 1.49609375,
+        "result_shape": [
+          60000,
+          5
+        ]
+      },
+      "xarray": {
+        "time": 6.49931526184082,
+        "memory": 0.12890625,
+        "result_vars": 2
+      }
+    },
+    "join_with_aggregation": {
+      "polars": {
+        "time": 0.013495683670043945,
+        "memory": 0.76953125,
+        "result_shape": [
+          57500,
+          5
+        ]
+      },
+      "xarray": {
+        "note": "Complex operation - not directly comparable"
+      }
+    }
+  },
+  "total_benchmark_time": 134.39743328094482
+}

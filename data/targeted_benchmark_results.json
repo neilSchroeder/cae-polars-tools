@@ -1,0 +1,109 @@
+{
+  "pipeline": {
+    "loading": {
+      "polars": {
+        "time": 7.427637577056885,
+        "memory": 83.87109375,
+        "shape": [
+          960000,
+          4
+        ]
+      },
+      "xarray": {
+        "time": 10.08368730545044,
+        "memory": 85.37109375,
+        "shape": [
+          24,
+          200,
+          200
+        ]
+      }
+    },
+    "complex_chain": {
+      "polars": {
+        "time": 0.05817770957946777,
+        "memory": 153.5859375,
+        "shape": [
+          7951,
+          8
+        ]
+      },
+      "xarray": {
+        "time": 0.015956401824951172,
+        "memory": 0.7109375,
+        "type": "basic_stats"
+      }
+    }
+  },
+  "queries": {
+    "conditional_agg": {
+      "polars": {
+        "time": 0.03893637657165527,
+        "memory": 39.7265625,
+        "shape": [
+          24,
+          7
+        ]
+      },
+      "xarray": {
+        "time": 0.11997556686401367,
+        "memory": 0.65625,
+        "shape": [
+          24,
+          6
+        ]
+      }
+    },
+    "rolling": {
+      "polars": {
+        "time": 0.09214305877685547,
+        "memory": 67.74609375,
+        "shape": [
+          960000,
+          7
+        ]
+      },
+      "xarray": {
+        "time": 0.01177835464477539,
+        "memory": 0.0,
+        "type": "multiple_arrays"
+      }
+    }
+  },
+  "joins": {
+    "complex_join": {
+      "polars": {
+        "time": 0.007504940032958984,
+        "memory": 1.6015625,
+        "shape": [
+          60,
+          10
+        ]
+      },
+      "xarray": {
+        "time": 6.619089365005493,
+        "memory": -51.0625,
+        "note": "Limited capability"
+      }
+    }
+  },
+  "categorical": {
+    "categorical": {
+      "polars": {
+        "time": 0.01314091682434082,
+        "memory": 1.4921875,
+        "shape": [
+          40,
+          8
+        ],
+        "groups": 40
+      },
+      "xarray": {
+        "time": 6.001422882080078,
+        "memory": 2.51171875,
+        "note": "Very limited string/categorical support"
+      }
+    }
+  },
+  "total_benchmark_time": 44.94764256477356
+}
