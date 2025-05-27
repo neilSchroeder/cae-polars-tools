@@ -28,15 +28,11 @@
 
 ## Why an IOPlugin?
 
-Traditional approaches for reading cloud-based Zarr data often involve:
-1. **Slow initialization** - Loading metadata can take seconds
-2. **Memory limitations** - Loading entire datasets into memory
-3. **Format conversion overhead** - Multiple transformation steps
-4. **Limited filtering** - Processing full datasets then filtering
+Polars does not currently support reading or scanning `.zarr` files. Instead they recommend that you write your own IOPlugin for unsupported file types. You can read the guidance [here](https://docs.pola.rs/user-guide/plugins/io_plugins/).
 
-**CAE-Polars solves these problems by:**
+**CAE-Polars provides the following services:**
 - Reading data directly into Polars LazyFrames
-- Providing streaming capabilities for large datasets
+- Streaming capabilities for large datasets
 - Supporting dimension selection at read-time
 - Optimizing S3 access patterns for climate data
 
@@ -49,14 +45,14 @@ pip install cae-polars
 
 ### From source
 ```bash
-git clone https://github.com/nschroed/cae-polars.git
+git clone https://github.com/neilSchroeder/cae-polars-tools.git
 cd cae-polars
 pip install -e .
 ```
 
 ### Development installation
 ```bash
-git clone https://github.com/nschroed/cae-polars.git
+git clone https://github.com/neilSchroeder/cae-polars.git
 cd cae-polars
 pip install -e ".[dev]"
 ```
@@ -233,7 +229,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Development Setup
 
 ```bash
-git clone https://github.com/nschroed/cae-polars.git
+git clone https://github.com/neilSchroeder/cae-polars.git
 cd cae-polars
 pip install -e ".[dev]"
 pre-commit install
