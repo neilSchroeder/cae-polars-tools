@@ -100,7 +100,7 @@ pre-commit run --all-files
 ## Project Structure
 
 ```
-cae-polars/
+cae-polars-tools/
 ├── examples/
 │   └── basic_usage.py          # Simple usage examples
 ├── src/
