@@ -7,11 +7,8 @@ command execution, and utility functions.
 
 import argparse
 import json
-import sys
-import tempfile
 from io import StringIO
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, mock_open, patch
+from unittest.mock import Mock, mock_open, patch
 
 import polars as pl
 import pytest

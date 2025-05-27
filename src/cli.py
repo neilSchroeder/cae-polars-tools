@@ -7,10 +7,7 @@ Provides utilities for working with Zarr files and benchmarking performance.
 import argparse
 import json
 import sys
-from pathlib import Path
 from typing import Optional
-
-import polars as pl
 
 from .data_access import ClimateDataReader, get_climate_data_info
 

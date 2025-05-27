@@ -37,7 +37,7 @@ class TestClimateDataReader:
 
         # Check that components were initialized with correct parameters
         mock_store.assert_called_once_with(
-            store_path=self.store_path, 
+            store_path=self.store_path,
             storage_options=self.storage_options,
             group=None,
             consolidated=None
@@ -169,7 +169,7 @@ class TestClimateDataReader:
         assert call_args[2] == select_dims
 
     @patch("src.data_access.zarr_reader.S3ZarrStore")
-    @patch("src.data_access.zarr_reader.CoordinateProcessor") 
+    @patch("src.data_access.zarr_reader.CoordinateProcessor")
     @patch("src.data_access.zarr_reader.PolarsConverter")
     def test_read_array_streaming(self, mock_converter, mock_coord_proc, mock_store):
         """Test array reading with streaming enabled."""
@@ -360,7 +360,7 @@ class TestClimateDataReader:
                 consolidated=consolidated,
                 chunk_size=chunk_size
             )
-            
+
             assert reader.chunk_size == chunk_size
             mock_store.assert_called_with(
                 store_path=self.store_path,
