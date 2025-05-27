@@ -7,7 +7,7 @@ with coordinate handling and conversion to Polars DataFrames.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import polars as pl
 
@@ -48,9 +48,9 @@ class ClimateDataReader:
     def __init__(
         self,
         store_path: str,
-        storage_options: Optional[Dict[str, Any]] = None,
-        group: Optional[str] = None,
-        consolidated: Optional[bool] = None,
+        storage_options: dict[str, Any] | None = None,
+        group: str | None = None,
+        consolidated: bool | None = None,
         chunk_size: int = 10000,
     ) -> None:
         """
@@ -85,7 +85,7 @@ class ClimateDataReader:
         self.converter = PolarsConverter(chunk_size=chunk_size)
         self.chunk_size = chunk_size
 
-    def list_arrays(self) -> List[str]:
+    def list_arrays(self) -> list[str]:
         """
         List all arrays in the zarr group.
 
@@ -96,7 +96,7 @@ class ClimateDataReader:
         """
         return self.store.list_arrays()
 
-    def get_array_info(self, array_name: str) -> Dict[str, Any]:
+    def get_array_info(self, array_name: str) -> dict[str, Any]:
         """
         Get comprehensive information about a specific array.
 
@@ -116,7 +116,7 @@ class ClimateDataReader:
     def read_array(
         self,
         array_name: str,
-        select_dims: Optional[Dict[str, Union[slice, int, List[int]]]] = None,
+        select_dims: dict[str, slice | int | list[int]] | None = None,
         streaming: bool = True,
     ) -> pl.LazyFrame:
         """
@@ -196,8 +196,8 @@ class ClimateDataReader:
         )
 
     def read_multiple_arrays(
-        self, array_names: List[str], streaming: bool = True
-    ) -> Dict[str, pl.LazyFrame]:
+        self, array_names: list[str], streaming: bool = True
+    ) -> dict[str, pl.LazyFrame]:
         """
         Read multiple arrays and return a dictionary of LazyFrames.
 

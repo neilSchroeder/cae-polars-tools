@@ -8,7 +8,7 @@ providing a clean interface for managing cloud-based climate datasets.
 from __future__ import annotations
 
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import s3fs
@@ -19,7 +19,7 @@ except ImportError:
     ZARR_AVAILABLE = False
     warnings.warn(
         "zarr and s3fs packages required for Zarr S3 functionality. "
-        "Install with: pip install zarr s3fs"
+        "Install with: pip install zarr s3fs", stacklevel=2
     )
 
 
@@ -62,9 +62,9 @@ class S3ZarrStore:
     def __init__(
         self,
         store_path: str,
-        storage_options: Optional[Dict[str, Any]] = None,
-        group: Optional[str] = None,
-        consolidated: Optional[bool] = None,
+        storage_options: dict[str, Any] | None = None,
+        group: str | None = None,
+        consolidated: bool | None = None,
     ) -> None:
         if not ZARR_AVAILABLE:
             raise ImportError(
@@ -75,8 +75,8 @@ class S3ZarrStore:
         self.storage_options = storage_options or {}
         self.group = group
         self.consolidated = consolidated
-        self._zarr_group: Optional[Any] = None
-        self._fs: Optional[s3fs.S3FileSystem] = None
+        self._zarr_group: Any | None = None
+        self._fs: s3fs.S3FileSystem | None = None
 
     def get_filesystem(self) -> s3fs.S3FileSystem:
         """
@@ -154,7 +154,7 @@ class S3ZarrStore:
 
         return self._zarr_group
 
-    def list_arrays(self) -> List[str]:
+    def list_arrays(self) -> list[str]:
         """
         List all arrays in the zarr group.
 
@@ -201,7 +201,7 @@ class S3ZarrStore:
             raise KeyError(f"Array '{array_name}' not found in zarr store")
         return group[array_name]
 
-    def get_array_info(self, array_name: str) -> Dict[str, Any]:
+    def get_array_info(self, array_name: str) -> dict[str, Any]:
         """
         Get comprehensive information about a specific array.
 

@@ -110,7 +110,7 @@ class TestZarrScanner:
         mock_reader.read_array.return_value = mock_lf
         mock_reader_class.return_value = mock_reader
 
-        result = scan_climate_data(
+        scan_climate_data(
             self.store_path,
             array_name="temperature",
             group="climate_vars",

@@ -7,7 +7,7 @@ into Polars LazyFrames with a simple, intuitive interface.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import polars as pl
 
@@ -16,14 +16,14 @@ from .zarr_reader import ClimateDataReader
 
 def scan_climate_data(
     store_path: str,
-    array_name: Optional[str] = None,
-    storage_options: Optional[Dict[str, Any]] = None,
-    group: Optional[str] = None,
-    consolidated: Optional[bool] = None,
-    select_dims: Optional[Dict[str, Union[slice, int, List[int]]]] = None,
+    array_name: str | None = None,
+    storage_options: dict[str, Any] | None = None,
+    group: str | None = None,
+    consolidated: bool | None = None,
+    select_dims: dict[str, slice | int | list[int]] | None = None,
     chunk_size: int = 10000,
     streaming: bool = True,
-) -> Union[pl.LazyFrame, Dict[str, pl.LazyFrame]]:
+) -> pl.LazyFrame | dict[str, pl.LazyFrame]:
     """
     Scan climate data from Zarr files on S3 into Polars LazyFrames.
 
@@ -106,10 +106,10 @@ def scan_climate_data(
 
 def get_climate_data_info(
     store_path: str,
-    storage_options: Optional[Dict[str, Any]] = None,
-    group: Optional[str] = None,
-    consolidated: Optional[bool] = None,
-) -> Dict[str, Any]:
+    storage_options: dict[str, Any] | None = None,
+    group: str | None = None,
+    consolidated: bool | None = None,
+) -> dict[str, Any]:
     """
     Get comprehensive information about a Zarr store and its arrays.
 

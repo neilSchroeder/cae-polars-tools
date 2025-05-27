@@ -7,7 +7,7 @@ from Zarr stores, providing optimized coordinate meshgrid creation for large dat
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 
@@ -32,11 +32,11 @@ class CoordinateProcessor:
 
     def __init__(self, cache_size_threshold: int = 10000) -> None:
         self.cache_size_threshold = cache_size_threshold
-        self._coord_cache: Dict[str, np.ndarray] = {}
+        self._coord_cache: dict[str, np.ndarray] = {}
 
     def extract_coordinate_arrays(
-        self, group: Any, dims: List[str]
-    ) -> Dict[str, Optional[np.ndarray]]:
+        self, group: Any, dims: list[str]
+    ) -> dict[str, np.ndarray | None]:
         """
         Extract coordinate arrays from zarr group for each dimension with caching.
 
@@ -75,10 +75,10 @@ class CoordinateProcessor:
 
     def process_dimension_selection(
         self,
-        dims: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
-        select_dims: Optional[Dict[str, Union[slice, int, List[int]]]],
-    ) -> Tuple[List[Any], List[str], Dict[str, Optional[np.ndarray]]]:
+        dims: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
+        select_dims: dict[str, slice | int | list[int]] | None,
+    ) -> tuple[list[Any], list[str], dict[str, np.ndarray | None]]:
         """
         Process dimension selection criteria and apply to coordinate arrays.
 
@@ -134,10 +134,10 @@ class CoordinateProcessor:
 
     def create_coordinate_expansions(
         self,
-        data_shape: Tuple[int, ...],
-        dim_names: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
-    ) -> Dict[str, np.ndarray]:
+        data_shape: tuple[int, ...],
+        dim_names: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
+    ) -> dict[str, np.ndarray]:
         """
         Create efficient coordinate expansions without full meshgrids.
 
@@ -180,12 +180,12 @@ class CoordinateProcessor:
 
     def create_streaming_coordinate_chunks(
         self,
-        data_shape: Tuple[int, ...],
-        dim_names: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
+        data_shape: tuple[int, ...],
+        dim_names: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
         start_idx: int,
         end_idx: int,
-    ) -> Dict[str, np.ndarray]:
+    ) -> dict[str, np.ndarray]:
         """
         Create coordinate chunks for streaming processing.
 

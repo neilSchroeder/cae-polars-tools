@@ -7,8 +7,6 @@ into Polars LazyFrames with optimized streaming and memory management.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 import numpy as np
 import polars as pl
 
@@ -38,8 +36,8 @@ class PolarsConverter:
     def array_to_polars_lazy(
         self,
         data: np.ndarray,
-        dim_names: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
+        dim_names: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
         streaming: bool = True,
     ) -> pl.LazyFrame:
         """
@@ -86,8 +84,8 @@ class PolarsConverter:
     def _multidim_to_polars(
         self,
         data: np.ndarray,
-        dim_names: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
+        dim_names: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
     ) -> pl.LazyFrame:
         """
         Convert multi-dimensional array to Polars LazyFrame (non-streaming).
@@ -128,8 +126,8 @@ class PolarsConverter:
     def _streaming_multidim_to_polars(
         self,
         data: np.ndarray,
-        dim_names: List[str],
-        coord_arrays: Dict[str, Optional[np.ndarray]],
+        dim_names: list[str],
+        coord_arrays: dict[str, np.ndarray | None],
     ) -> pl.LazyFrame:
         """
         Convert multi-dimensional array to Polars LazyFrame with memory-efficient streaming.
