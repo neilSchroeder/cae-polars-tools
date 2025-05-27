@@ -1,5 +1,5 @@
 """
-High-level Zarr data reader for climate datasets.
+High-level Zarr data reader for zarr datasets.
 
 This module provides the main interface for reading Zarr arrays from S3
 with coordinate handling and conversion to Polars DataFrames.
@@ -16,9 +16,9 @@ from .polars_converter import PolarsConverter
 from .zarr_storage import S3ZarrStore
 
 
-class ClimateDataReader:
+class ZarrDataReader:
     """
-    High-performance reader for climate data stored as Zarr arrays on S3.
+    High-performance reader for data stored as Zarr arrays on S3.
 
     This class provides the main interface for reading multi-dimensional climate
     datasets from S3 storage with automatic coordinate handling, streaming support
@@ -33,13 +33,13 @@ class ClimateDataReader:
     Examples:
         Basic usage::
 
-            reader = ClimateDataReader("s3://bucket/data.zarr")
+            reader = ZarrDataReader("s3://bucket/data.zarr")
             arrays = reader.list_arrays()
             lf = reader.read_array("temperature")
 
         With S3 credentials::
 
-            reader = ClimateDataReader(
+            reader = ZarrDataReader(
                 "s3://bucket/data.zarr",
                 storage_options={"key": "ACCESS_KEY", "secret": "SECRET_KEY"}
             )
@@ -54,7 +54,7 @@ class ClimateDataReader:
         chunk_size: int = 10000,
     ) -> None:
         """
-        Initialize Climate Data Reader.
+        Initialize Zarr Data Reader.
 
         Parameters
         ----------

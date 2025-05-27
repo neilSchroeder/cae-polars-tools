@@ -21,7 +21,7 @@ import polars as pl
 # Add the src directory to the path for this example
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from data_access import ClimateDataReader, get_climate_data_info, scan_climate_data
+from data_access import ZarrDataReader, get_zarr_data_info, scan_data
 
 
 def basic_example():
@@ -35,7 +35,7 @@ def basic_example():
 
     try:
         # Read a larger subset to show more comprehensive data coverage
-        lf = scan_climate_data(
+        lf = scan_data(
             store_path,
             array_name="tasmax",
             storage_options={"anon": True},  # Anonymous access for public data
@@ -142,7 +142,7 @@ def basic_example():
             )
 
             # Try a different region - central US
-            lf2 = scan_climate_data(
+            lf2 = scan_data(
                 store_path,
                 array_name="tasmax",
                 storage_options={"anon": True},
@@ -188,7 +188,7 @@ def advanced_analysis_example():
 
     try:
         # Create a reader for more advanced operations
-        reader = ClimateDataReader(store_path, storage_options={"anon": True})
+        reader = ZarrDataReader(store_path, storage_options={"anon": True})
 
         # Read a larger subset with streaming - focus on land areas
         lf = reader.read_array(
@@ -291,7 +291,7 @@ def dataset_info_example():
 
     try:
         # Get information about the dataset
-        info = get_climate_data_info(store_path, storage_options={"anon": True})
+        info = get_zarr_data_info(store_path, storage_options={"anon": True})
 
         print(f"Store path: {info['store_path']}")
         print(f"Available arrays: {list(info['arrays'].keys())}")
@@ -326,7 +326,7 @@ def memory_efficient_example():
 
     try:
         # Create reader with custom chunk size for memory control
-        reader = ClimateDataReader(
+        reader = ZarrDataReader(
             store_path,
             storage_options={"anon": True},
             chunk_size=10000,  # Smaller chunks for demo
@@ -415,10 +415,10 @@ def local_file_example():
 
     print("To read from a local Zarr file:")
     print("")
-    print("from data_access import scan_climate_data")
+    print("from data_access import scan_data")
     print("")
     print("# Read from local file")
-    print("lf = scan_climate_data(")
+    print("lf = scan_data(")
     print(f"    '{local_path}',")
     print("    array_name='your_array_name',")
     print("    # No storage_options needed for local files")

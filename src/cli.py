@@ -9,13 +9,13 @@ import json
 import sys
 from typing import Optional
 
-from .data_access import ClimateDataReader, get_climate_data_info
+from .data_access import ZarrDataReader, get_zarr_data_info
 
 
 def info_command(args) -> None:
     """Get information about a Zarr store."""
     try:
-        info = get_climate_data_info(
+        info = get_zarr_data_info(
             args.store_path,
             storage_options=_parse_storage_options(args.storage_options),
             group=args.group,
@@ -36,7 +36,7 @@ def info_command(args) -> None:
 def read_command(args) -> None:
     """Read a Zarr array and save to parquet."""
     try:
-        reader = ClimateDataReader(
+        reader = ZarrDataReader(
             args.store_path,
             storage_options=_parse_storage_options(args.storage_options),
             group=args.group,
@@ -69,7 +69,7 @@ def benchmark_command(args) -> None:
     try:
         import time
 
-        reader = ClimateDataReader(
+        reader = ZarrDataReader(
             args.store_path,
             storage_options=_parse_storage_options(args.storage_options),
         )
@@ -135,7 +135,7 @@ def _parse_select_dims(select_dims_str: str) -> dict:
 def create_parser() -> argparse.ArgumentParser:
     """Create the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        description="CAE-Polars: High-performance Zarr I/O for Polars",
+        description="CAE-Polars-Tools: High-performance Zarr I/O for Polars",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 

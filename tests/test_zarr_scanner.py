@@ -9,11 +9,7 @@ from unittest.mock import Mock, patch
 import polars as pl
 import pytest
 
-from src.data_access.zarr_scanner import (
-    get_climate_data_info,
-    scan_climate_data,
-    zarr_s3_info,
-)
+from src.data_access.zarr_scanner import get_zarr_data_info, scan_data, zarr_s3_info
 
 
 @pytest.mark.unit
@@ -25,15 +21,15 @@ class TestZarrScanner:
         self.store_path = "s3://test-bucket/climate-data/test.zarr"
         self.storage_options = {"anon": True}
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
-    def test_scan_climate_data_basic(self, mock_reader_class):
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
+    def test_scan_zarr_data_basic(self, mock_reader_class):
         """Test basic climate data scanning."""
         mock_reader = Mock()
         mock_lf = Mock(spec=pl.LazyFrame)
         mock_reader.read_array.return_value = mock_lf
         mock_reader_class.return_value = mock_reader
 
-        result = scan_climate_data(
+        result = scan_data(
             self.store_path,
             array_name="temperature",
             storage_options=self.storage_options,
@@ -51,7 +47,7 @@ class TestZarrScanner:
             array_name="temperature", select_dims=None, streaming=True
         )
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_scan_climate_data_with_selection(self, mock_reader_class):
         """Test climate data scanning with dimension selection."""
         mock_reader = Mock()
@@ -65,7 +61,7 @@ class TestZarrScanner:
             "lon": slice(300, 400),
         }
 
-        result = scan_climate_data(
+        result = scan_data(
             self.store_path,
             array_name="temperature",
             storage_options=self.storage_options,
@@ -79,7 +75,7 @@ class TestZarrScanner:
             array_name="temperature", select_dims=select_dims, streaming=False
         )
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_scan_climate_data_all_arrays(self, mock_reader_class):
         """Test scanning all arrays when array_name is None."""
         mock_reader = Mock()
@@ -92,7 +88,7 @@ class TestZarrScanner:
         mock_reader.read_multiple_arrays.return_value = mock_result_dict
         mock_reader_class.return_value = mock_reader
 
-        result = scan_climate_data(
+        result = scan_data(
             self.store_path, array_name=None, storage_options=self.storage_options
         )
 
@@ -102,7 +98,7 @@ class TestZarrScanner:
             ["temperature", "precipitation"], streaming=True
         )
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_scan_climate_data_with_group(self, mock_reader_class):
         """Test scanning with zarr group specification."""
         mock_reader = Mock()
@@ -110,7 +106,7 @@ class TestZarrScanner:
         mock_reader.read_array.return_value = mock_lf
         mock_reader_class.return_value = mock_reader
 
-        scan_climate_data(
+        scan_data(
             self.store_path,
             array_name="temperature",
             group="climate_vars",
@@ -125,7 +121,7 @@ class TestZarrScanner:
             chunk_size=10000,
         )
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_get_climate_data_info(self, mock_reader_class):
         """Test getting climate data information."""
         mock_reader = Mock()
@@ -148,7 +144,7 @@ class TestZarrScanner:
         ]
         mock_reader_class.return_value = mock_reader
 
-        result = get_climate_data_info(
+        result = get_zarr_data_info(
             self.store_path, storage_options=self.storage_options
         )
 
@@ -164,7 +160,7 @@ class TestZarrScanner:
         assert temp_info["dtype"] == "float32"
         assert temp_info["attrs"]["units"] == "K"
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_zarr_s3_info_legacy_alias(self, mock_reader_class):
         """Test legacy alias zarr_s3_info."""
         mock_reader = Mock()
@@ -184,26 +180,26 @@ class TestZarrScanner:
         assert "store_path" in result
         assert "arrays" in result
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
-    def test_scan_climate_data_error_handling(self, mock_reader_class):
-        """Test error handling in scan_climate_data."""
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
+    def test_scan_zarr_data_error_handling(self, mock_reader_class):
+        """Test error handling in scan_zarr_data."""
         # Test reader initialization error
         mock_reader_class.side_effect = Exception("Connection failed")
 
         with pytest.raises(Exception, match="Connection failed"):
-            scan_climate_data(self.store_path, array_name="temperature")
+            scan_data(self.store_path, array_name="temperature")
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
-    def test_scan_climate_data_nonexistent_array(self, mock_reader_class):
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
+    def test_scan_zarr_data_nonexistent_array(self, mock_reader_class):
         """Test scanning non-existent array."""
         mock_reader = Mock()
         mock_reader.read_array.side_effect = KeyError("Array not found")
         mock_reader_class.return_value = mock_reader
 
         with pytest.raises(KeyError):
-            scan_climate_data(self.store_path, array_name="nonexistent")
+            scan_data(self.store_path, array_name="nonexistent")
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_different_storage_options(self, mock_reader_class):
         """Test scanning with different storage options."""
         mock_reader = Mock()
@@ -219,7 +215,7 @@ class TestZarrScanner:
         ]
 
         for options in storage_options_tests:
-            result = scan_climate_data(
+            result = scan_data(
                 self.store_path, array_name="temperature", storage_options=options
             )
 
@@ -228,7 +224,7 @@ class TestZarrScanner:
             call_args = mock_reader_class.call_args[1]
             assert call_args["storage_options"] == options
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_streaming_parameter(self, mock_reader_class):
         """Test streaming parameter behavior."""
         mock_reader = Mock()
@@ -237,18 +233,18 @@ class TestZarrScanner:
         mock_reader_class.return_value = mock_reader
 
         # Test streaming=True
-        scan_climate_data(self.store_path, array_name="temperature", streaming=True)
+        scan_data(self.store_path, array_name="temperature", streaming=True)
 
         call_args = mock_reader.read_array.call_args[1]
         assert call_args["streaming"] is True
 
         # Test streaming=False
-        scan_climate_data(self.store_path, array_name="temperature", streaming=False)
+        scan_data(self.store_path, array_name="temperature", streaming=False)
 
         call_args = mock_reader.read_array.call_args[1]
         assert call_args["streaming"] is False
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_select_dims_types(self, mock_reader_class):
         """Test different types of dimension selections."""
         mock_reader = Mock()
@@ -268,7 +264,7 @@ class TestZarrScanner:
         ]
 
         for select_dims in select_dims_tests:
-            result = scan_climate_data(
+            result = scan_data(
                 self.store_path, array_name="temperature", select_dims=select_dims
             )
 
@@ -276,7 +272,7 @@ class TestZarrScanner:
             call_args = mock_reader.read_array.call_args[1]
             assert call_args["select_dims"] == select_dims
 
-    @patch("src.data_access.zarr_scanner.ClimateDataReader")
+    @patch("src.data_access.zarr_scanner.ZarrDataReader")
     def test_consolidated_metadata_parameter(self, mock_reader_class):
         """Test consolidated metadata parameter."""
         mock_reader = Mock()
@@ -285,13 +281,13 @@ class TestZarrScanner:
         mock_reader_class.return_value = mock_reader
 
         # Test consolidated=True
-        scan_climate_data(self.store_path, array_name="temperature", consolidated=True)
+        scan_data(self.store_path, array_name="temperature", consolidated=True)
 
         call_args = mock_reader_class.call_args[1]
         assert call_args["consolidated"] is True
 
         # Test consolidated=False
-        scan_climate_data(self.store_path, array_name="temperature", consolidated=False)
+        scan_data(self.store_path, array_name="temperature", consolidated=False)
 
         call_args = mock_reader_class.call_args[1]
         assert call_args["consolidated"] is False

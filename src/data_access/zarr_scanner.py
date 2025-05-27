@@ -11,10 +11,10 @@ from typing import Any
 
 import polars as pl
 
-from .zarr_reader import ClimateDataReader
+from .zarr_reader import ZarrDataReader
 
 
-def scan_climate_data(
+def scan_data(
     store_path: str,
     array_name: str | None = None,
     storage_options: dict[str, Any] | None = None,
@@ -65,7 +65,7 @@ def scan_climate_data(
     --------
     Read a specific array::
 
-        lf = scan_climate_data(
+        lf = scan_data(
             "s3://my-bucket/data.zarr",
             array_name="temperature",
             storage_options={"key": "ACCESS_KEY", "secret": "SECRET_KEY"}
@@ -73,7 +73,7 @@ def scan_climate_data(
 
     Read with dimension selection::
 
-        lf = scan_climate_data(
+        lf = scan_data(
             "s3://my-bucket/data.zarr",
             array_name="temperature",
             select_dims={"time": slice(0, 100), "lat": slice(10, 20)}
@@ -81,10 +81,10 @@ def scan_climate_data(
 
     List all arrays::
 
-        reader = ClimateDataReader("s3://my-bucket/data.zarr")
+        reader = ZarrDataReader("s3://my-bucket/data.zarr")
         arrays = reader.list_arrays()
     """
-    reader = ClimateDataReader(
+    reader = ZarrDataReader(
         store_path=store_path,
         storage_options=storage_options,
         group=group,
@@ -104,7 +104,7 @@ def scan_climate_data(
         return reader.read_multiple_arrays(arrays, streaming=streaming)
 
 
-def get_climate_data_info(
+def get_zarr_data_info(
     store_path: str,
     storage_options: dict[str, Any] | None = None,
     group: str | None = None,
@@ -129,7 +129,7 @@ def get_climate_data_info(
     Dict[str, Any]
         Dictionary containing store information and array metadata.
     """
-    reader = ClimateDataReader(
+    reader = ZarrDataReader(
         store_path=store_path,
         storage_options=storage_options,
         group=group,
@@ -146,5 +146,5 @@ def get_climate_data_info(
 
 
 # Legacy aliases for backward compatibility
-scan_zarr_s3 = scan_climate_data
-zarr_s3_info = get_climate_data_info
+scan_zarr_s3 = scan_data
+zarr_s3_info = get_zarr_data_info

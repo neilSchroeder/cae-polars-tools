@@ -111,7 +111,7 @@ class TestCLI:
         with pytest.raises(ValueError, match="Invalid select_dims format"):
             _parse_select_dims("{'unclosed': dict")
 
-    @patch("src.cli.get_climate_data_info")
+    @patch("src.cli.get_zarr_data_info")
     @patch("sys.stdout", new_callable=StringIO)
     def test_info_command_basic(self, mock_stdout, mock_get_info):
         """Test basic info command functionality."""
@@ -126,7 +126,7 @@ class TestCLI:
 
         info_command(args)
 
-        # Check that get_climate_data_info was called correctly
+        # Check that get_zarr_data_info was called correctly
         mock_get_info.assert_called_once_with(
             self.store_path,
             storage_options=None,
@@ -139,7 +139,7 @@ class TestCLI:
         assert "temperature" in output
         assert "precipitation" in output
 
-    @patch("src.cli.get_climate_data_info")
+    @patch("src.cli.get_zarr_data_info")
     @patch("builtins.open", new_callable=mock_open)
     @patch("sys.stdout", new_callable=StringIO)
     def test_info_command_with_output_file(self, mock_stdout, mock_file, mock_get_info):
@@ -155,7 +155,7 @@ class TestCLI:
 
         info_command(args)
 
-        # Check that get_climate_data_info was called with parsed options
+        # Check that get_zarr_data_info was called with parsed options
         mock_get_info.assert_called_once_with(
             self.store_path,
             storage_options={"anon": True},
@@ -179,7 +179,7 @@ class TestCLI:
         output = mock_stdout.getvalue()
         assert "Info saved to info.json" in output
 
-    @patch("src.cli.get_climate_data_info")
+    @patch("src.cli.get_zarr_data_info")
     @patch("sys.stderr", new_callable=StringIO)
     def test_info_command_error_handling(self, mock_stderr, mock_get_info):
         """Test info command error handling."""
@@ -201,7 +201,7 @@ class TestCLI:
         error_output = mock_stderr.getvalue()
         assert "Error: Connection failed" in error_output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stdout", new_callable=StringIO)
     def test_read_command_basic(self, mock_stdout, mock_reader_class):
         """Test basic read command functionality."""
@@ -252,9 +252,9 @@ class TestCLI:
         assert "Shape: (1000, 4)" in output
         assert "Columns: ['time', 'lat', 'lon', 'temperature']" in output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stdout", new_callable=StringIO)
-    def test_read_command_with_options(self, mock_stdout, mock_reader_class):
+    def test_read_command_with_options(self, _, mock_reader_class):
         """Test read command with various options."""
         mock_reader = Mock()
         mock_lf = Mock(spec=pl.LazyFrame)
@@ -295,7 +295,7 @@ class TestCLI:
         # Check custom output file was used
         mock_df.write_parquet.assert_called_once_with("custom_output.parquet")
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stderr", new_callable=StringIO)
     def test_read_command_error_handling(self, mock_stderr, mock_reader_class):
         """Test read command error handling."""
@@ -320,7 +320,7 @@ class TestCLI:
         error_output = mock_stderr.getvalue()
         assert "Error: Failed to create reader" in error_output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("time.time")
     @patch("sys.stdout", new_callable=StringIO)
     def test_benchmark_command_basic(self, mock_stdout, mock_time, mock_reader_class):
@@ -372,7 +372,7 @@ class TestCLI:
         assert "Data shape: (1000, 4)" in output
         assert "Memory usage: 15.50 MB" in output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stdout", new_callable=StringIO)
     def test_benchmark_command_specific_array(self, mock_stdout, mock_reader_class):
         """Test benchmark command with specific array."""
@@ -403,7 +403,7 @@ class TestCLI:
         output = mock_stdout.getvalue()
         assert "Benchmarking array: precipitation" in output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stdout", new_callable=StringIO)
     def test_benchmark_command_no_arrays(self, mock_stdout, mock_reader_class):
         """Test benchmark command when no arrays are found."""
@@ -424,7 +424,7 @@ class TestCLI:
         output = mock_stdout.getvalue()
         assert "No arrays found in store" in output
 
-    @patch("src.cli.ClimateDataReader")
+    @patch("src.cli.ZarrDataReader")
     @patch("sys.stderr", new_callable=StringIO)
     def test_benchmark_command_error_handling(self, mock_stderr, mock_reader_class):
         """Test benchmark command error handling."""

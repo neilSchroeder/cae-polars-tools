@@ -11,12 +11,12 @@ import numpy as np
 import polars as pl
 import pytest
 
-from src.data_access.zarr_reader import ClimateDataReader
+from src.data_access.zarr_reader import ZarrDataReader
 
 
 @pytest.mark.unit
-class TestClimateDataReader:
-    """Test suite for ClimateDataReader functionality."""
+class TestZarrDataReader:
+    """Test suite for ZarrDataReader functionality."""
 
     def setup_method(self):
         """Set up test fixtures for each test method."""
@@ -27,8 +27,8 @@ class TestClimateDataReader:
     @patch("src.data_access.zarr_reader.CoordinateProcessor")
     @patch("src.data_access.zarr_reader.PolarsConverter")
     def test_init(self, mock_converter, mock_coord_proc, mock_store):
-        """Test ClimateDataReader initialization."""
-        reader = ClimateDataReader(
+        """Test ZarrDataReader initialization."""
+        reader = ZarrDataReader(
             self.store_path, storage_options=self.storage_options, chunk_size=5000
         )
 
@@ -53,7 +53,7 @@ class TestClimateDataReader:
         mock_store_instance.list_arrays.return_value = ["temperature", "precipitation"]
         mock_store.return_value = mock_store_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         arrays = reader.list_arrays()
 
         assert arrays == ["temperature", "precipitation"]
@@ -73,7 +73,7 @@ class TestClimateDataReader:
         mock_store_instance.get_array_info.return_value = mock_info
         mock_store.return_value = mock_store_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         info = reader.get_array_info("temperature")
 
         assert info == mock_info
@@ -120,7 +120,7 @@ class TestClimateDataReader:
         mock_converter_instance.array_to_polars_lazy.return_value = mock_lf
         mock_converter.return_value = mock_converter_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         result = reader.read_array("temperature")
 
         assert result == mock_lf
@@ -162,7 +162,7 @@ class TestClimateDataReader:
         )
         mock_converter.return_value = mock_converter_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         reader.read_array("temperature", select_dims=select_dims)
 
         # Check that selection was passed to coordinate processor
@@ -202,7 +202,7 @@ class TestClimateDataReader:
         )
         mock_converter.return_value = mock_converter_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         reader.read_array("temperature", streaming=True)
 
         # Check that streaming was passed to converter
@@ -216,7 +216,7 @@ class TestClimateDataReader:
         mock_store_instance.get_array.side_effect = KeyError("Array not found")
         mock_store.return_value = mock_store_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
 
         with pytest.raises(KeyError):
             reader.read_array("nonexistent_array")
@@ -246,7 +246,7 @@ class TestClimateDataReader:
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
 
         with pytest.raises(Exception, match="Coord error"):
             reader.read_array("temperature")
@@ -283,7 +283,7 @@ class TestClimateDataReader:
         mock_converter.return_value = mock_converter_instance
 
         # Use small chunk size for large array
-        reader = ClimateDataReader(self.store_path, chunk_size=1000)
+        reader = ZarrDataReader(self.store_path, chunk_size=1000)
         reader.read_array("large_temperature", streaming=True)
 
         # Should enable streaming for large arrays
@@ -323,7 +323,7 @@ class TestClimateDataReader:
         mock_converter_instance.array_to_polars_lazy.return_value = mock_lf
         mock_converter.return_value = mock_converter_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
 
         results = reader.read_multiple_arrays(arrays_to_read)
 
@@ -341,7 +341,7 @@ class TestClimateDataReader:
 
         for invalid_path in invalid_paths:
             # Should not fail during initialization, failures come during usage
-            reader = ClimateDataReader(invalid_path)
+            reader = ZarrDataReader(invalid_path)
             # Just check that object was created
             assert hasattr(reader, "store")
             assert hasattr(reader, "coord_processor")
@@ -359,7 +359,7 @@ class TestClimateDataReader:
         ]
 
         for storage_options, group, consolidated, chunk_size in test_cases:
-            reader = ClimateDataReader(
+            reader = ZarrDataReader(
                 self.store_path,
                 storage_options=storage_options,
                 group=group,
@@ -408,7 +408,7 @@ class TestClimateDataReader:
         )
         mock_converter.return_value = mock_converter_instance
 
-        reader = ClimateDataReader(self.store_path)
+        reader = ZarrDataReader(self.store_path)
         result = reader.read_array("temperature")
 
         # Should use default dimension names and still work

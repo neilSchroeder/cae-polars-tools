@@ -1,6 +1,6 @@
-# Contributing to CAE-Polars
+# Contributing to CAE-Polars-Tools
 
-Thank you for your interest in contributing to CAE-Polars! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to CAE-Polars-Tools! This document provides guidelines and information for contributors.
 
 ## Code of Conduct
 
@@ -10,7 +10,7 @@ This project and everyone participating in it is governed by our commitment to c
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the [issue tracker](https://github.com/nschroed/cae-polars/issues) to see if the issue has already been reported.
+Before creating bug reports, please check the [issue tracker](https://github.com/nschroed/cae-polars-tools/issues) to see if the issue has already been reported.
 
 When creating a bug report, please include:
 - A clear and descriptive title
@@ -48,33 +48,30 @@ Enhancement suggestions are welcome! Please:
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/cae-polars.git
+git clone https://github.com/YOUR_USERNAME/cae-polars-tools.git
 cd cae-polars
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# install uv
+pip install uv
 
-# Install in development mode
-pip install -e ".[dev]"
-
-# Install pre-commit hooks
-pre-commit install
+# get environment up and running
+uv sync
+source .venv/bin/activate
 ```
 
 ### Running Tests
 
 ```bash
 # Run all tests
-pytest
+uv run python -m pytest
 
 # Run tests with coverage
-pytest --cov=src --cov-report=html
+uv run python -m pytest --cov=src --cov-report=html
 
 # Run specific test categories
-pytest -m "not slow"           # Skip slow tests
-pytest -m "integration"       # Run integration tests
-pytest -m "benchmark"         # Run benchmark tests
+uv run python pytest -m "not slow"           # Skip slow tests
+uv run python pytest -m "integration"       # Run integration tests
+uv run python pytest -m "benchmark"         # Run benchmark tests
 ```
 
 ### Code Style
@@ -82,18 +79,10 @@ pytest -m "benchmark"         # Run benchmark tests
 This project uses several tools to maintain code quality:
 
 - **Black** for code formatting
-- **Ruff** for linting
-- **MyPy** for type checking
 
 ```bash
 # Format code
 black src tests
-
-# Check linting
-ruff check src tests
-
-# Type checking
-mypy src
 ```
 
 ### Pre-commit Hooks
@@ -112,17 +101,24 @@ pre-commit run --all-files
 
 ```
 cae-polars/
+├── examples/
+│   └── basic_usage.py          # Simple usage examples
 ├── src/
-│   └── data_access/           # Main package
+│   └── data_access/                 # Main package
 │       ├── __init__.py
-│       ├── zarr_scanner.py    # High-level API
-│       ├── zarr_reader.py     # ClimateDataReader class
-│       ├── zarr_storage.py    # S3 storage management
+│       ├── zarr_scanner.py          # High-level API
+│       ├── zarr_reader.py           # ZarrDataReader class
+│       ├── zarr_storage.py          # S3 storage management
 │       ├── coordinate_processor.py  # Coordinate handling
-│       ├── polars_converter.py     # Data conversion
-│       └── polars_IOplugin_zarr.py # Legacy implementation
+│       └── polars_converter.py      # Data conversion
 ├── tests/                     # Test suite
-├── data/                      # Benchmark data
+|   ├── conftest.py
+|   ├── test_cli.py
+|   ├── test_coordinate_processor.py
+|   ├── test_polars_converter.py
+|   ├── test_zarr_reader.py
+|   ├── test_zarr_scanner.py
+|   └── test_zarr_storage.py
 ├── docs/                      # Documentation
 ├── pyproject.toml             # Project configuration
 └── README.md
@@ -140,7 +136,7 @@ cae-polars/
 
 ### Documentation
 
-- Use Google-style docstrings
+- Use numpy-style docstrings
 - Include examples in docstrings where helpful
 - Update README.md if adding new features
 - Add type hints for better IDE support
