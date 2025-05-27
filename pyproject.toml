@@ -9,10 +9,10 @@ description = "High-performance Zarr I/O plugin for Polars with climate data pro
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Nathan Schroeder", email = "nschroed@example.com"},
+    {name = "Neil Schroeder", email = "schr1077@gmail.com"},
 ]
 maintainers = [
-    {name = "Nathan Schroeder", email = "nschroed@example.com"},
+    {name = "Neil Schroeder", email = "schr1077@gmail.com"},
 ]
 keywords = [
     "polars",
