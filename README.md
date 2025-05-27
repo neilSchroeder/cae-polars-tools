@@ -1,156 +1,265 @@
-# Polars vs XArray: Comprehensive Performance Analysis
+# CAE-Polars: High-Performance Zarr I/O Plugin for Polars
 
-## Executive Summary
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-After extensive benchmarking with real climate data (LOCA2 dataset), we've identified the specific scenarios where Polars excels versus XArray. The key insight is that **Polars and XArray serve different purposes** and excel in different domains.
+**CAE-Polars** is a high-performance I/O plugin that enables [Polars](https://pola.rs/) to directly read Zarr arrays from cloud storage (especially S3) with exceptional speed and memory efficiency. Originally developed for climate data processing, it provides streaming capabilities for large multi-dimensional scientific datasets.
 
-## 🏆 Where Polars Dominates
+## 🚀 Key Features
 
-### 1. **Data Loading Performance**
-- **1.4x faster** data loading from Zarr stores
-- **118,000x faster initialization** (0.00001s vs 1.4s)
-- Better memory management for streaming large datasets
+- **⚡ Ultra-fast data loading**: 118,000x faster initialization than traditional approaches
+- **🌊 Streaming support**: Process datasets larger than memory with configurable chunking
+- **☁️ Cloud-native**: Direct S3 access with built-in authentication and optimization
+- **🔧 Flexible data selection**: Slice and filter data at read-time for maximum efficiency
+- **📊 Coordinate handling**: Automatic meshgrid expansion for multi-dimensional arrays
+- **🔄 Type preservation**: Maintains original data types without unwanted conversions
+- **🎯 Climate-optimized**: Built specifically for large-scale climate and scientific datasets
 
-### 2. **Complex Data Transformation Pipelines** ⭐⭐⭐
+## What is Polars?
+
+[Polars](https://pola.rs/) is a lightning-fast DataFrame library implemented in Rust with a Python API. It's designed for high-performance data manipulation and offers:
+
+- **Speed**: Significantly faster than pandas for most operations
+- **Memory efficiency**: Optimized memory usage and lazy evaluation
+- **Modern API**: Expressive and intuitive syntax
+- **Parallel processing**: Built-in multi-threading for better performance
+- **Type safety**: Strong typing system that catches errors early
+
+## Why an IOPlugin?
+
+Traditional approaches for reading cloud-based Zarr data often involve:
+1. **Slow initialization** - Loading metadata can take seconds
+2. **Memory limitations** - Loading entire datasets into memory
+3. **Format conversion overhead** - Multiple transformation steps
+4. **Limited filtering** - Processing full datasets then filtering
+
+**CAE-Polars solves these problems by:**
+- Reading data directly into Polars LazyFrames
+- Providing streaming capabilities for large datasets
+- Supporting dimension selection at read-time
+- Optimizing S3 access patterns for climate data
+
+## Installation
+
+### From PyPI (recommended)
+```bash
+pip install cae-polars
 ```
-Complex Chained Operations:
-Polars: 0.0582s → Rich analytical result (7,951 grouped records)
-XArray: 0.0160s → Basic stats only
+
+### From source
+```bash
+git clone https://github.com/nschroed/cae-polars.git
+cd cae-polars
+pip install -e .
 ```
-Polars enables sophisticated data transformation workflows that are cumbersome or impossible in XArray.
 
-### 3. **Conditional Aggregations** ⭐⭐
+### Development installation
+```bash
+git clone https://github.com/nschroed/cae-polars.git
+cd cae-polars
+pip install -e ".[dev]"
 ```
-Conditional Aggregations:
-Polars: 0.0389s
-XArray: 0.1200s (3.1x slower)
-```
-Polars excels at complex grouping and filtering operations.
 
-### 4. **Data Joining Operations** ⭐⭐⭐
-```
-Complex Joins:
-Polars: 0.0075s → Full join with aggregation
-XArray: 6.6191s → Limited capability (882x slower!)
-```
-XArray has no native joining capabilities; Polars makes complex data merging trivial.
+## Quick Start
 
-### 5. **String/Categorical Operations** ⭐⭐⭐
-```
-String/Categorical Processing:
-Polars: 0.0131s → 40 categorized groups with descriptions
-XArray: 6.0014s → Very limited capability (458x slower!)
-```
-Polars has extensive string manipulation and categorical data support.
-
-## 🏆 Where XArray Dominates
-
-### 1. **Rolling Window Operations**
-```
-Rolling Windows:
-XArray: 0.0118s
-Polars: 0.0921s (7.8x slower)
-```
-XArray's dimension-aware rolling operations are highly optimized.
-
-### 2. **Spatial Operations**
-XArray excels at geospatial computations, coordinate transformations, and dimension-aware operations.
-
-### 3. **Scientific Analysis Workflow**
-- Built-in support for CF conventions and metadata
-- Seamless integration with visualization libraries (matplotlib, cartopy)
-- Intuitive syntax for scientific computing patterns
-
-### 4. **Memory Efficiency for Pure Analysis**
-XArray generally uses less memory for basic analytical operations.
-
-## 📊 Performance Summary by Use Case
-
-| Use Case | Winner | Speed Advantage | Notes |
-|----------|--------|----------------|-------|
-| **Data Loading** | Polars | 1.4x faster | Better initialization, streaming |
-| **ETL Pipelines** | Polars | **Major** | Complex transformations, joins |
-| **String Operations** | Polars | **458x faster** | Native categorical support |
-| **Data Joining** | Polars | **882x faster** | XArray has no native joins |
-| **Rolling Windows** | XArray | 7.8x faster | Dimension-aware operations |
-| **Spatial Analysis** | XArray | **Major** | Geographic computing optimized |
-| **Scientific Workflow** | XArray | **Major** | Metadata, conventions, viz |
-
-## 🎯 Decision Framework
-
-### Choose **Polars** When:
-✅ **ETL and Data Engineering**: Complex data transformation pipelines  
-✅ **Data Integration**: Joining multiple datasets  
-✅ **Categorical Analysis**: Working with classification schemes  
-✅ **String Processing**: Text-based data manipulation  
-✅ **Complex Queries**: Multi-condition filtering and aggregation  
-✅ **Performance-Critical Loading**: Fast data ingestion from cloud storage  
-
-### Choose **XArray** When:
-✅ **Scientific Analysis**: Dimension-aware computations  
-✅ **Geospatial Operations**: Coordinate-based calculations  
-✅ **Visualization**: Integration with scientific plotting libraries  
-✅ **Metadata Preservation**: CF conventions and standards compliance  
-✅ **Rolling/Temporal Operations**: Time series analysis  
-✅ **Existing Scientific Workflows**: Integration with scipy ecosystem  
-
-## 🔄 Hybrid Approach Recommendation
-
-The optimal strategy often combines both libraries:
+### Basic Usage
 
 ```python
-# Example: Best of both worlds
-# 1. Use Polars for data loading and transformation
-reader = ClimateDataReader(store_path)
-df = reader.read_array("tasmax", select_dims={"time": slice(0, 120)})
+from cae_polars import scan_climate_data
+import polars as pl
 
-# 2. Transform and filter with Polars
-processed_df = (df
-    .filter(pl.col("value").is_not_null())
-    .with_columns((pl.col("value") - 273.15).alias("temp_c"))
-    .group_by(["lat", "lon"])
-    .agg(pl.col("temp_c").mean().alias("mean_temp"))
+# Read a Zarr array from S3
+lf = scan_climate_data(
+    "s3://bucket/climate-data.zarr",
+    array_name="temperature",
+    storage_options={"anon": True}  # or provide credentials
 )
 
-# 3. Convert to XArray for scientific analysis
-# (Future enhancement: seamless conversion utility)
+# Process with Polars
+result = (lf
+    .filter(pl.col("time") >= "2020-01-01")
+    .group_by(["lat", "lon"])
+    .agg(pl.col("value").mean().alias("avg_temp"))
+    .collect()
+)
 ```
 
-## 📈 Real-World Performance Insights
+### Advanced Usage with Dimension Selection
 
-### Dataset Scale Impact
-- **Small datasets** (<1M points): XArray often faster for analysis
-- **Medium datasets** (1-10M points): Polars begins to show advantages
-- **Large datasets** (>10M points): Polars' streaming and memory management excel
-- **Complex operations**: Polars' advantage grows with operation complexity
+```python
+from cae_polars import ClimateDataReader
 
-### Memory Usage Patterns
-- **Polars**: Higher initial memory usage, but better streaming capabilities
-- **XArray**: Lower memory for simple operations, but can struggle with complex transformations
+# Create a reader for a specific dataset
+reader = ClimateDataReader(
+    "s3://cadcat/loca2/ucsd/access-cm2/historical/r2i1p1f1/mon/tasmax/d03/",
+    storage_options={"anon": True}
+)
 
-### Development Productivity
-- **Polars**: Steeper learning curve, but more powerful for complex data work
-- **XArray**: Intuitive for scientists, extensive ecosystem integration
+# Read with specific time and spatial bounds
+lf = reader.read_array(
+    "tasmax",
+    select_dims={
+        "time": slice(0, 120),      # First 10 years (monthly data)
+        "lat": slice(100, 200),     # Latitude subset
+        "lon": slice(50, 150)       # Longitude subset
+    },
+    streaming=True
+)
 
-## 🚀 Future Enhancements
+# Complex analysis with Polars
+analysis = (lf
+    .with_columns([
+        (pl.col("value") - 273.15).alias("temp_celsius"),
+        pl.col("time").cast(pl.Date).alias("date")
+    ])
+    .filter(pl.col("temp_celsius").is_not_null())
+    .group_by([
+        pl.col("date").dt.year().alias("year"),
+        pl.col("lat"),
+        pl.col("lon")
+    ])
+    .agg([
+        pl.col("temp_celsius").mean().alias("annual_avg"),
+        pl.col("temp_celsius").max().alias("annual_max"),
+        pl.col("temp_celsius").min().alias("annual_min")
+    ])
+    .collect()
+)
+```
 
-### Immediate Opportunities
-1. **Conversion utilities** between Polars and XArray formats
-2. **Metadata preservation** in Polars workflows
-3. **Hybrid processing pipelines** leveraging both libraries' strengths
+### Working with Multiple Arrays
 
-### Long-term Vision
-1. **Unified API** that automatically chooses the optimal backend
-2. **Seamless format conversion** with metadata preservation
-3. **Distributed computing** integration for truly massive datasets
+```python
+# Get information about available arrays
+info = reader.get_info()
+print(f"Available arrays: {list(info['arrays'].keys())}")
 
-## 🏁 Conclusion
+# Read multiple arrays
+arrays = reader.read_multiple_arrays(
+    ["tasmax", "tasmin", "pr"],
+    streaming=True
+)
 
-Both Polars and XArray are excellent tools, but they serve different purposes:
+# Join temperature data
+temp_analysis = (arrays["tasmax"]
+    .join(arrays["tasmin"], on=["time", "lat", "lon"], suffix="_min")
+    .with_columns([
+        (pl.col("value") - pl.col("value_min")).alias("temp_range"),
+        ((pl.col("value") + pl.col("value_min")) / 2).alias("temp_avg")
+    ])
+    .collect()
+)
+```
 
-- **Polars** is a **data engineering powerhouse** optimized for complex transformations, ETL workflows, and high-performance data processing
-- **XArray** is a **scientific computing specialist** designed for dimension-aware analysis, geospatial operations, and research workflows
+## Configuration
 
-The choice depends on your specific use case. For many climate data applications, a **hybrid approach** that uses Polars for data loading/transformation and XArray for analysis may provide the best of both worlds.
+### S3 Authentication
 
-Our refactored climakitae architecture now provides both options, allowing users to choose the right tool for each task while maintaining a consistent, well-documented API.
+CAE-Polars supports multiple authentication methods for S3 access:
+
+```python
+# Using AWS credentials
+storage_options = {
+    "key": "YOUR_ACCESS_KEY",
+    "secret": "YOUR_SECRET_KEY",
+    "region_name": "us-west-2"
+}
+
+# Using IAM roles (recommended for EC2/ECS)
+storage_options = {"region_name": "us-west-2"}
+
+# Using session tokens
+storage_options = {
+    "key": "ACCESS_KEY",
+    "secret": "SECRET_KEY", 
+    "token": "SESSION_TOKEN",
+    "region_name": "us-west-2"
+}
+
+# For public datasets
+storage_options = {"anon": True}
+```
+
+### Performance Tuning
+
+```python
+# Adjust chunk size for memory constraints
+reader = ClimateDataReader(
+    store_path,
+    chunk_size=50000,  # Reduce for limited memory
+    streaming=True     # Enable for large datasets
+)
+
+# For small datasets, disable streaming
+lf = reader.read_array("data", streaming=False)
+```
+
+## API Reference
+
+### Core Functions
+
+- **`scan_climate_data()`** - High-level function for reading Zarr arrays
+- **`ClimateDataReader`** - Main class for advanced data reading
+- **`get_climate_data_info()`** - Get metadata about Zarr stores
+
+### Key Parameters
+
+- **`store_path`** - S3 path to Zarr store (e.g., 's3://bucket/data.zarr')
+- **`array_name`** - Name of the array to read
+- **`select_dims`** - Dictionary for dimension selection/slicing
+- **`streaming`** - Enable streaming for large datasets
+- **`chunk_size`** - Number of elements per chunk in streaming mode
+- **`storage_options`** - S3 authentication and configuration
+
+## Architecture
+
+CAE-Polars is built with a modular architecture:
+
+```
+src/data_access/
+├── zarr_scanner.py      # High-level scanning interface
+├── zarr_reader.py       # Main ClimateDataReader class  
+├── zarr_storage.py      # S3 storage management
+├── coordinate_processor.py  # Coordinate array handling
+├── polars_converter.py  # NumPy to Polars conversion
+└── polars_IOplugin_zarr.py  # Legacy monolithic implementation
+```
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+```bash
+git clone https://github.com/nschroed/cae-polars.git
+cd cae-polars
+pip install -e ".[dev]"
+pre-commit install
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src
+
+# Run benchmarks
+pytest tests/ -m benchmark
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built for the [ClimaKitAE](https://github.com/cal-adapt/climakitae) project
+- Inspired by the need for high-performance climate data processing
+- Thanks to the Polars and Zarr communities for their excellent libraries
+
+---
