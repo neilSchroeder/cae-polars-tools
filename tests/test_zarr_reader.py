@@ -40,7 +40,7 @@ class TestClimateDataReader:
             store_path=self.store_path,
             storage_options=self.storage_options,
             group=None,
-            consolidated=None
+            consolidated=None,
         )
         mock_coord_proc.assert_called_once()
         mock_converter.assert_called_once_with(chunk_size=5000)
@@ -110,7 +110,7 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [],  # selection
             ["time", "lat", "lon"],  # selected_dims
-            test_coords  # selected_coord_arrays
+            test_coords,  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
@@ -152,12 +152,14 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [slice(0, 6), slice(2, 8), [5, 10, 15]],  # selection
             ["time", "lat", "lon"],  # selected_dims
-            {}  # selected_coord_arrays
+            {},  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
         mock_converter_instance = Mock()
-        mock_converter_instance.array_to_polars_lazy.return_value = Mock(spec=pl.LazyFrame)
+        mock_converter_instance.array_to_polars_lazy.return_value = Mock(
+            spec=pl.LazyFrame
+        )
         mock_converter.return_value = mock_converter_instance
 
         reader = ClimateDataReader(self.store_path)
@@ -190,12 +192,14 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [],  # selection
             ["time", "lat", "lon"],  # selected_dims
-            {}  # selected_coord_arrays
+            {},  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
         mock_converter_instance = Mock()
-        mock_converter_instance.array_to_polars_lazy.return_value = Mock(spec=pl.LazyFrame)
+        mock_converter_instance.array_to_polars_lazy.return_value = Mock(
+            spec=pl.LazyFrame
+        )
         mock_converter.return_value = mock_converter_instance
 
         reader = ClimateDataReader(self.store_path)
@@ -268,12 +272,14 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [],  # selection
             ["time", "lat", "lon"],  # selected_dims
-            {}  # selected_coord_arrays
+            {},  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
         mock_converter_instance = Mock()
-        mock_converter_instance.array_to_polars_lazy.return_value = Mock(spec=pl.LazyFrame)
+        mock_converter_instance.array_to_polars_lazy.return_value = Mock(
+            spec=pl.LazyFrame
+        )
         mock_converter.return_value = mock_converter_instance
 
         # Use small chunk size for large array
@@ -308,7 +314,7 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [],  # selection
             ["time", "lat", "lon"],  # selected_dims
-            {}  # selected_coord_arrays
+            {},  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
@@ -337,9 +343,9 @@ class TestClimateDataReader:
             # Should not fail during initialization, failures come during usage
             reader = ClimateDataReader(invalid_path)
             # Just check that object was created
-            assert hasattr(reader, 'store')
-            assert hasattr(reader, 'coord_processor')
-            assert hasattr(reader, 'converter')
+            assert hasattr(reader, "store")
+            assert hasattr(reader, "coord_processor")
+            assert hasattr(reader, "converter")
 
     @patch("src.data_access.zarr_reader.S3ZarrStore")
     def test_different_initialization_parameters(self, mock_store):
@@ -358,7 +364,7 @@ class TestClimateDataReader:
                 storage_options=storage_options,
                 group=group,
                 consolidated=consolidated,
-                chunk_size=chunk_size
+                chunk_size=chunk_size,
             )
 
             assert reader.chunk_size == chunk_size
@@ -366,13 +372,15 @@ class TestClimateDataReader:
                 store_path=self.store_path,
                 storage_options=storage_options,
                 group=group,
-                consolidated=consolidated
+                consolidated=consolidated,
             )
 
     @patch("src.data_access.zarr_reader.S3ZarrStore")
     @patch("src.data_access.zarr_reader.CoordinateProcessor")
     @patch("src.data_access.zarr_reader.PolarsConverter")
-    def test_array_without_dimension_attrs(self, mock_converter, mock_coord_proc, mock_store):
+    def test_array_without_dimension_attrs(
+        self, mock_converter, mock_coord_proc, mock_store
+    ):
         """Test reading array that doesn't have _ARRAY_DIMENSIONS attribute."""
         # Mock the zarr array without _ARRAY_DIMENSIONS
         mock_array = Mock()
@@ -390,12 +398,14 @@ class TestClimateDataReader:
         mock_coord_proc_instance.process_dimension_selection.return_value = (
             [],  # selection
             ["dim_0", "dim_1", "dim_2"],  # default dim names
-            {}  # selected_coord_arrays
+            {},  # selected_coord_arrays
         )
         mock_coord_proc.return_value = mock_coord_proc_instance
 
         mock_converter_instance = Mock()
-        mock_converter_instance.array_to_polars_lazy.return_value = Mock(spec=pl.LazyFrame)
+        mock_converter_instance.array_to_polars_lazy.return_value = Mock(
+            spec=pl.LazyFrame
+        )
         mock_converter.return_value = mock_converter_instance
 
         reader = ClimateDataReader(self.store_path)
