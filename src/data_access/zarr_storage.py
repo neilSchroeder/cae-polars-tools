@@ -19,7 +19,8 @@ except ImportError:
     ZARR_AVAILABLE = False
     warnings.warn(
         "zarr and s3fs packages required for Zarr S3 functionality. "
-        "Install with: pip install zarr s3fs", stacklevel=2
+        "Install with: pip install zarr s3fs",
+        stacklevel=2,
     )
 
 

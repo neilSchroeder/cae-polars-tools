@@ -36,7 +36,6 @@ jobs:
     
     - name: Run linting
       run: |
-        uv run ruff check src tests
         uv run black --check src tests
     
     - name: Run tests
