@@ -1,6 +1,6 @@
-# CAE-Polars: High-Performance Zarr I/O Plugin for Polars
+# CAE-Polars-Tools: High-Performance Zarr I/O Plugin for Polars
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Test Coverage](https://img.shields.io/codecov/c/github/neilSchroeder/cae-polars-tools/main.svg)](https://codecov.io/gh/neilSchroeder/cae-polars-tools)
