@@ -1,0 +1,90 @@
+/* Custom CSS for cae-polars documentation */
+
+/* Improve code block styling */
+.highlight {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Style for code spans */
+code {
+    background-color: #f1f3f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+/* Custom styling for admonitions */
+.admonition {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-left: 4px solid #007acc;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.admonition.note {
+    border-left-color: #007acc;
+}
+
+.admonition.warning {
+    border-left-color: #ff6b35;
+    background-color: #fff3cd;
+}
+
+.admonition.tip {
+    border-left-color: #28a745;
+    background-color: #d4edda;
+}
+
+/* Style for API documentation */
+.function, .class, .method {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+}
+
+.function h3, .class h3, .method h3 {
+    margin-top: 0;
+    color: #495057;
+}
+
+/* Navigation improvements */
+.wy-nav-content {
+    max-width: 1200px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    margin: 1rem 0;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .wy-nav-content {
+        margin-left: 0;
+    }
+    
+    .highlight {
+        padding: 0.5rem;
+    }
+}
