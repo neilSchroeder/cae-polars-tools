@@ -7,7 +7,10 @@ Provides utilities for working with Zarr files and benchmarking performance.
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Optional
+
+import polars as pl
 
 from .data_access import ZarrDataReader, get_zarr_data_info
 
@@ -135,7 +138,7 @@ def _parse_select_dims(select_dims_str: str) -> dict:
 def create_parser() -> argparse.ArgumentParser:
     """Create the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        description="CAE-Polars-Tools: High-performance Zarr I/O for Polars",
+        description="CAE-Polars: High-performance Zarr I/O for Polars",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 

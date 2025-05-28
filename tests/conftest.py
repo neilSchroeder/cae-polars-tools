@@ -6,8 +6,8 @@ CAE-Polars package across unit and integration tests.
 """
 
 import tempfile
-from collections.abc import Generator
 from pathlib import Path
+from typing import Any, Dict, Generator
 from unittest.mock import Mock, patch
 
 import numpy as np

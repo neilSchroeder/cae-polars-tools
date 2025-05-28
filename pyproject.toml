@@ -165,7 +165,6 @@ ignore_missing_imports = true
 # Pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = ["src"]
 addopts = [
     "--strict-markers",
     "--strict-config",
@@ -176,7 +175,6 @@ addopts = [
 ]
 testpaths = ["tests"]
 markers = [
-    "unit: marks tests as unit tests (deselect with '-m \"not unit\"')",
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "benchmark: marks tests as benchmark tests",

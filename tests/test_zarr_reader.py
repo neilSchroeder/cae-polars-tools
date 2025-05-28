@@ -1,5 +1,5 @@
 """
-Unit tests for ClimateDataReader class.
+Unit tests for ZarrDataReader class.
 
 Tests high-level zarr reading interface with coordinate processing
 and Polars DataFrame conversion.
