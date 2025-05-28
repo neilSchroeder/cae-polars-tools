@@ -1,13 +1,37 @@
 """
 Command-line interface for CAE-Polars.
 
-Provides utilities for working with Zarr files and benchmarking performance.
+This module provides a comprehensive command-line interface for working with
+Zarr files, including data inspection, reading, and performance benchmarking.
+The CLI is designed to be user-friendly while exposing the full power of the
+CAE-Polars library for batch processing and automation workflows.
+
+The CLI supports three main commands:
+- info: Get detailed information about Zarr stores and arrays
+- read: Read Zarr arrays and export to various formats
+- benchmark: Performance testing and profiling
+
+Examples
+--------
+Get information about a Zarr store:
+    $ cae-polars info s3://bucket/data.zarr --storage-options '{"anon": true}'
+
+Read an array and save to Parquet:
+    $ cae-polars read s3://bucket/data.zarr temperature --output temp.parquet
+
+Benchmark performance:
+    $ cae-polars benchmark s3://bucket/data.zarr --array-name temperature
+
+Notes
+-----
+All commands support S3 storage with flexible authentication options.
+Storage options can be provided as JSON or key=value pairs.
+Dimension selection uses Python dictionary syntax for flexibility.
 """
 
 import argparse
 import json
 import sys
-from pathlib import Path
 from typing import Optional
 
 import polars as pl
@@ -16,7 +40,43 @@ from .data_access import ZarrDataReader, get_zarr_data_info
 
 
 def info_command(args) -> None:
-    """Get information about a Zarr store."""
+    """
+    Get comprehensive information about a Zarr store and its arrays.
+
+    This command provides detailed metadata about Zarr stores, including
+    information about available arrays, their shapes, data types, chunking
+    schemes, and attributes. The output can be displayed to stdout or saved
+    to a JSON file.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command-line arguments containing:
+        - store_path : str
+            Path to the Zarr store (local or S3)
+        - storage_options : str, optional
+            Storage authentication options as JSON or key=value pairs
+        - group : str, optional
+            Specific group within the Zarr store to examine
+        - output : str, optional
+            Output file path for saving the information as JSON
+
+    Raises
+    ------
+    SystemExit
+        If an error occurs during information retrieval, exits with code 1
+
+    Examples
+    --------
+    Get info about all arrays in a store:
+        $ cae-polars info s3://bucket/data.zarr
+
+    Get info about a specific group and save to file:
+        $ cae-polars info s3://bucket/data.zarr --group climate --output info.json
+
+    Get info with S3 credentials:
+        $ cae-polars info s3://bucket/data.zarr --storage-options '{"key":"ACCESS_KEY"}'
+    """
     try:
         info = get_zarr_data_info(
             args.store_path,
@@ -37,7 +97,49 @@ def info_command(args) -> None:
 
 
 def read_command(args) -> None:
-    """Read a Zarr array and save to parquet."""
+    """
+    Read a Zarr array and export it to Parquet format.
+
+    This command reads a specific array from a Zarr store and saves it as a
+    Parquet file. It supports dimension selection for reading subsets of data
+    and can handle large datasets through streaming.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command-line arguments containing:
+        - store_path : str
+            Path to the Zarr store (local or S3)
+        - array_name : str
+            Name of the array to read
+        - storage_options : str, optional
+            Storage authentication options as JSON or key=value pairs
+        - group : str, optional
+            Specific group within the Zarr store
+        - select_dims : str, optional
+            Dimension selection as Python dict string
+        - streaming : bool
+            Whether to use streaming mode (default True)
+        - output : str, optional
+            Output file path (defaults to {array_name}.parquet)
+
+    Raises
+    ------
+    SystemExit
+        If an error occurs during reading or writing, exits with code 1
+
+    Examples
+    --------
+    Read an entire array:
+        $ cae-polars read s3://bucket/data.zarr temperature
+
+    Read with dimension selection:
+        $ cae-polars read s3://bucket/data.zarr temperature \\
+            --select-dims "{'time': [0, 1, 2], 'lat': slice(10, 20)}"
+
+    Save to specific file:
+        $ cae-polars read s3://bucket/data.zarr temperature --output my_data.parquet
+    """
     try:
         reader = ZarrDataReader(
             args.store_path,
@@ -68,7 +170,51 @@ def read_command(args) -> None:
 
 
 def benchmark_command(args) -> None:
-    """Run a simple benchmark test."""
+    """
+    Run a comprehensive benchmark test on Zarr array reading performance.
+
+    This command performs timing measurements for different stages of the
+    data reading pipeline, including array opening, lazy frame creation,
+    and data collection. It provides insights into performance characteristics
+    for optimization purposes.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Command-line arguments containing:
+        - store_path : str
+            Path to the Zarr store (local or S3)
+        - array_name : str, optional
+            Name of the array to benchmark (uses first array if not specified)
+        - storage_options : str, optional
+            Storage authentication options as JSON or key=value pairs
+        - streaming : bool
+            Whether to use streaming mode (default True)
+
+    Raises
+    ------
+    SystemExit
+        If an error occurs during benchmarking, exits with code 1
+
+    Examples
+    --------
+    Benchmark default array:
+        $ cae-polars benchmark s3://bucket/data.zarr
+
+    Benchmark specific array:
+        $ cae-polars benchmark s3://bucket/data.zarr --array-name temperature
+
+    Benchmark without streaming:
+        $ cae-polars benchmark s3://bucket/data.zarr --no-streaming
+
+    Notes
+    -----
+    The benchmark measures:
+    - Read time: Time to create LazyFrame from Zarr array
+    - Collect time: Time to materialize LazyFrame into DataFrame
+    - Total time: Combined read and collect time
+    - Memory usage: Estimated size of the resulting DataFrame
+    """
     try:
         import time
 
@@ -109,7 +255,36 @@ def benchmark_command(args) -> None:
 
 
 def _parse_storage_options(storage_options_str: Optional[str]) -> Optional[dict]:
-    """Parse storage options from command line."""
+    """
+    Parse storage options from command line string.
+
+    Supports both JSON format and simple key=value pair format for
+    specifying S3 credentials and other storage options.
+
+    Parameters
+    ----------
+    storage_options_str : str or None
+        Storage options as either:
+        - JSON string: '{"key": "value", "anon": true}'
+        - Key=value pairs: "key=access_key,secret=secret_key,region=us-west-2"
+        - None or empty string
+
+    Returns
+    -------
+    dict or None
+        Parsed storage options dictionary, or None if input is empty
+
+    Examples
+    --------
+    >>> _parse_storage_options('{"anon": true}')
+    {'anon': True}
+
+    >>> _parse_storage_options('key=access,secret=secret')
+    {'key': 'access', 'secret': 'secret'}
+
+    >>> _parse_storage_options(None)
+    None
+    """
     if not storage_options_str:
         return None
 
@@ -126,17 +301,68 @@ def _parse_storage_options(storage_options_str: Optional[str]) -> Optional[dict]
 
 
 def _parse_select_dims(select_dims_str: str) -> dict:
-    """Parse dimension selection from command line."""
+    """
+    Parse dimension selection from command line string.
+
+    Uses ast.literal_eval to safely parse Python dictionary strings
+    containing dimension selection criteria.
+
+    Parameters
+    ----------
+    select_dims_str : str
+        Dimension selection as Python dict string, e.g.:
+        "{'time': [0, 1, 2], 'lat': slice(10, 20)}"
+
+    Returns
+    -------
+    dict
+        Parsed dimension selection dictionary
+
+    Raises
+    ------
+    ValueError
+        If the string cannot be parsed as a valid Python dictionary
+
+    Examples
+    --------
+    >>> _parse_select_dims("{'time': 5}")
+    {'time': 5}
+
+    >>> _parse_select_dims("{'time': [0, 1, 2], 'lat': [10, 20]}")
+    {'time': [0, 1, 2], 'lat': [10, 20]}
+
+    Notes
+    -----
+    Only supports literals that can be parsed by ast.literal_eval.
+    slice() objects cannot be parsed and should be avoided in the input.
+    """
     import ast
 
     try:
         return ast.literal_eval(select_dims_str)
-    except (ValueError, SyntaxError):
-        raise ValueError(f"Invalid select_dims format: {select_dims_str}")
+    except (ValueError, SyntaxError) as e:
+        raise ValueError(f"Invalid select_dims format: {select_dims_str}") from e
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Create the command-line argument parser."""
+    """
+    Create the command-line argument parser.
+
+    Constructs a comprehensive argument parser with subcommands for different
+    operations (info, read, benchmark) and their respective arguments.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Configured argument parser with all subcommands and options
+
+    Examples
+    --------
+    >>> parser = create_parser()
+    >>> args = parser.parse_args(['info', 's3://bucket/data.zarr'])
+    >>> args.command
+    'info'
+    """
     parser = argparse.ArgumentParser(
         description="CAE-Polars: High-performance Zarr I/O for Polars",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -199,7 +425,24 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
-    """Main CLI entry point."""
+    """
+    Main CLI entry point.
+
+    Parses command-line arguments and dispatches to the appropriate
+    command function. Provides help message if no command is specified.
+
+    Raises
+    ------
+    SystemExit
+        Exits with code 1 if no command is provided, or with the code
+        returned by the executed command function.
+
+    Examples
+    --------
+    Called automatically when the module is run as a script:
+        $ python -m cae_polars info s3://bucket/data.zarr
+        $ cae-polars read s3://bucket/data.zarr temperature
+    """
     parser = create_parser()
     args = parser.parse_args()
 

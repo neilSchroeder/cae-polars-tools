@@ -1,8 +1,72 @@
 """
-High-level Zarr data reader for zarr datasets.
+High-level Zarr data reader for climate datasets stored on cloud storage.
 
-This module provides the main interface for reading Zarr arrays from S3
-with coordinate handling and conversion to Polars DataFrames.
+This module provides the main interface for reading multi-dimensional Zarr arrays
+from S3 or other cloud storage systems, with automatic coordinate handling,
+intelligent dimension selection, and efficient conversion to Polars DataFrames.
+
+The ZarrDataReader class serves as the primary entry point for accessing climate
+datasets, offering both streaming and non-streaming modes for optimal performance
+across different dataset sizes.
+
+Key Features
+------------
+- High-performance reading from S3-based Zarr stores
+- Automatic coordinate array extraction and expansion
+- Memory-efficient streaming for large datasets
+- Flexible dimension selection with slicing and indexing
+- Integration with Polars for efficient data manipulation
+- Support for consolidated and non-consolidated metadata
+
+Examples
+--------
+Basic usage with public S3 data:
+
+>>> from cae_polars.data_access import ZarrDataReader
+>>>
+>>> reader = ZarrDataReader("s3://bucket/climate-data.zarr")
+>>> arrays = reader.list_arrays()
+>>> print("Available arrays:", arrays)
+>>>
+>>> # Read temperature data
+>>> temp_df = reader.read_array("temperature")
+>>> result = temp_df.collect()
+
+With AWS credentials and dimension selection:
+
+>>> reader = ZarrDataReader(
+...     "s3://private-bucket/data.zarr",
+...     storage_options={
+...         "key": "ACCESS_KEY_ID",
+...         "secret": "SECRET_ACCESS_KEY",
+...         "region_name": "us-west-2"
+...     }
+... )
+>>>
+>>> # Read subset of data with dimension selection
+>>> subset_df = reader.read_array(
+...     "precipitation",
+...     select_dims={
+...         "time": slice(0, 365),  # First year
+...         "lat": slice(100, 200), # Latitude range
+...         "lon": [10, 20, 30]     # Specific longitudes
+...     }
+... )
+
+Reading multiple arrays efficiently:
+
+>>> arrays_dict = reader.read_multiple_arrays(
+...     ["temperature", "precipitation", "humidity"]
+... )
+>>> for name, lazy_df in arrays_dict.items():
+...     print(f"{name}: {lazy_df.schema}")
+
+Notes
+-----
+The reader automatically handles coordinate arrays, dimension metadata, and
+memory management. For large datasets, streaming mode is recommended to avoid
+memory overflow. The resulting Polars LazyFrames enable efficient downstream
+processing with deferred computation.
 """
 
 from __future__ import annotations
@@ -18,31 +82,68 @@ from .zarr_storage import S3ZarrStore
 
 class ZarrDataReader:
     """
-    High-performance reader for data stored as Zarr arrays on S3.
+    High-performance reader for multi-dimensional climate data stored as Zarr arrays.
 
-    This class provides the main interface for reading multi-dimensional climate
-    datasets from S3 storage with automatic coordinate handling, streaming support
-    for large datasets, and conversion to Polars LazyFrames.
+    This class provides the main interface for reading climate datasets from S3
+    or other cloud storage systems, with automatic coordinate handling, streaming
+    support for large datasets, and efficient conversion to Polars LazyFrames.
+    It integrates coordinate processing, dimension selection, and data conversion
+    into a unified, easy-to-use interface.
 
-    Attributes:
-        store: S3 Zarr store manager
-        coord_processor: Coordinate array processor
-        converter: Polars DataFrame converter
-        chunk_size: Number of data points to process per chunk in streaming mode
+    Parameters
+    ----------
+    store_path : str
+        S3 path to the zarr store (e.g., 's3://bucket/path/to/store.zarr')
+    storage_options : dict, optional
+        Options passed to s3fs for authentication and configuration
+    group : str, optional
+        Specific group within the zarr store to read from
+    consolidated : bool, optional
+        Whether to use consolidated metadata for improved performance
+    chunk_size : int, default 10000
+        Size of chunks for streaming processing of large arrays
 
-    Examples:
-        Basic usage::
+    Attributes
+    ----------
+    store : S3ZarrStore
+        S3 Zarr store manager for handling cloud storage operations
+    coord_processor : CoordinateProcessor
+        Processor for coordinate array extraction and expansion
+    converter : PolarsConverter
+        Converter for transforming arrays to Polars DataFrames
+    chunk_size : int
+        Number of data points to process per chunk in streaming mode
 
-            reader = ZarrDataReader("s3://bucket/data.zarr")
-            arrays = reader.list_arrays()
-            lf = reader.read_array("temperature")
+    Examples
+    --------
+    Basic usage with public data:
 
-        With S3 credentials::
+    >>> reader = ZarrDataReader("s3://bucket/data.zarr")
+    >>> arrays = reader.list_arrays()
+    >>> temp_data = reader.read_array("temperature")
 
-            reader = ZarrDataReader(
-                "s3://bucket/data.zarr",
-                storage_options={"key": "ACCESS_KEY", "secret": "SECRET_KEY"}
-            )
+    With authentication and specific group:
+
+    >>> reader = ZarrDataReader(
+    ...     "s3://private-bucket/data.zarr",
+    ...     storage_options={"key": "ACCESS_KEY", "secret": "SECRET_KEY"},
+    ...     group="climate_data",
+    ...     chunk_size=5000
+    ... )
+
+    Reading with dimension selection:
+
+    >>> data = reader.read_array(
+    ...     "precipitation",
+    ...     select_dims={"time": slice(0, 100), "lat": [10, 20, 30]}
+    ... )
+
+    Notes
+    -----
+    The reader automatically detects and processes coordinate arrays, handles
+    dimension metadata, and provides memory-efficient streaming for large datasets.
+    It's optimized for climate data workflows but can handle any multi-dimensional
+    Zarr arrays with coordinate information.
     """
 
     def __init__(
@@ -87,29 +188,59 @@ class ZarrDataReader:
 
     def list_arrays(self) -> list[str]:
         """
-        List all arrays in the zarr group.
+        List all arrays available in the zarr store.
 
         Returns
         -------
-        List[str]
-            List of array names available in the zarr store.
+        list of str
+            List of array names available in the zarr store. These names can
+            be used with read_array() to access the data.
+
+        Examples
+        --------
+        >>> reader = ZarrDataReader("s3://bucket/data.zarr")
+        >>> arrays = reader.list_arrays()
+        >>> print("Available arrays:", arrays)
+        ['temperature', 'precipitation', 'humidity']
         """
         return self.store.list_arrays()
 
     def get_array_info(self, array_name: str) -> dict[str, Any]:
         """
-        Get comprehensive information about a specific array.
+        Get comprehensive metadata information about a specific array.
+
+        Retrieves detailed information about an array including its shape,
+        data type, dimensions, chunking strategy, and custom attributes.
+        This is useful for understanding data structure before reading.
 
         Parameters
         ----------
         array_name : str
-            Name of the array to inspect.
+            Name of the array to inspect. Must be a valid array name from
+            the zarr store.
 
         Returns
         -------
-        Dict[str, Any]
-            Dictionary containing array metadata including shape, dtype,
-            dimensions, and attributes.
+        dict
+            Dictionary containing comprehensive array metadata:
+            - 'shape': Tuple of array dimensions
+            - 'dtype': Data type of array elements
+            - 'chunks': Chunking configuration
+            - 'dimensions': List of dimension names
+            - 'attributes': Custom metadata attributes
+            - 'size': Total number of elements
+
+        Raises
+        ------
+        KeyError
+            If array_name is not found in the zarr store
+
+        Examples
+        --------
+        >>> info = reader.get_array_info("temperature")
+        >>> print(f"Shape: {info['shape']}")
+        >>> print(f"Dimensions: {info['dimensions']}")
+        >>> print(f"Data type: {info['dtype']}")
         """
         return self.store.get_array_info(array_name)
 
@@ -199,19 +330,54 @@ class ZarrDataReader:
         self, array_names: list[str], streaming: bool = True
     ) -> dict[str, pl.LazyFrame]:
         """
-        Read multiple arrays and return a dictionary of LazyFrames.
+        Read multiple arrays efficiently and return a dictionary of LazyFrames.
+
+        Provides a convenient way to read multiple related arrays from the same
+        zarr store. Each array is processed independently with the same streaming
+        settings and coordinate handling.
 
         Parameters
         ----------
-        array_names : List[str]
-            Names of arrays to read.
+        array_names : list of str
+            Names of arrays to read. All names must exist in the zarr store.
         streaming : bool, default True
-            Whether to use streaming mode.
+            Whether to use streaming mode for all arrays. Large arrays benefit
+            from streaming to manage memory usage effectively.
 
         Returns
         -------
-        Dict[str, pl.LazyFrame]
-            Dictionary mapping array names to LazyFrames.
+        dict of {str : pl.LazyFrame}
+            Dictionary mapping array names to their corresponding LazyFrames.
+            Each LazyFrame has the same structure as returned by read_array().
+
+        Raises
+        ------
+        KeyError
+            If any array name in array_names is not found in the zarr store
+
+        Examples
+        --------
+        Read multiple climate variables:
+
+        >>> arrays_dict = reader.read_multiple_arrays([
+        ...     "temperature", "precipitation", "humidity"
+        ... ])
+        >>>
+        >>> # Process each array
+        >>> for name, lazy_df in arrays_dict.items():
+        ...     print(f"{name}: {lazy_df.schema}")
+        ...     result = lazy_df.filter(pl.col("time") > "2020-01-01").collect()
+
+        Combine multiple arrays for analysis:
+
+        >>> data = reader.read_multiple_arrays(["temp", "precip"])
+        >>> combined = data["temp"].join(data["precip"], on=["time", "lat", "lon"])
+
+        Notes
+        -----
+        This method processes arrays sequentially, not in parallel. For very
+        large numbers of arrays, consider processing in batches to manage
+        memory usage effectively.
         """
         return {
             name: self.read_array(name, streaming=streaming) for name in array_names
