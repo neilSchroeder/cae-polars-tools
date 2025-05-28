@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath("../src"))
 # Mock imports for dependencies that may not be available during doc build
 autodoc_mock_imports = [
     "zarr",
-    "polars", 
+    "polars",
     "boto3",
     "botocore",
     "numpy",
     "xarray",
     "s3fs",
-    "typer"
+    "typer",
 ]
 
 # -- Project information -----------------------------------------------------

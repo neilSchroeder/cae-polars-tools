@@ -311,9 +311,17 @@ class S3ZarrStore:
                 # Check if it's an array by looking for shape attribute
                 if hasattr(item, "shape") and hasattr(item, "dtype"):
                     arrays.append(name)
-            except Exception:
+            except (KeyError, AttributeError, TypeError) as e:
                 # Skip items that can't be accessed
                 continue
+            except Exception as e:
+                # Log unexpected errors but continue processing
+                warnings.warn(
+                    f"Error accessing item '{name}' in zarr group: {e}",
+                    stacklevel=2,
+                )
+                continue
+
         return arrays
 
     def get_array(self, array_name: str) -> Any:
